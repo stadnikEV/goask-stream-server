@@ -1,5 +1,5 @@
-const getRequestData = require('./stream/get-request-data');
-const HttpError = require('../error');
+const getRequestData = require('../stream/get-request-data');
+const HttpError = require('../../error');
 
 module.exports = (emitter, streams, req, res, next) => {
   const id = req.params.id;
@@ -13,25 +13,20 @@ module.exports = (emitter, streams, req, res, next) => {
       next(httpError);
       return;
   }
-  streamId.stopStrem();
+
 
   // получить данные из request
   getRequestData({ req })
     .then((data) => {
       // Добавить данные в stream
-      return streamId.addToStream({ data });
+      return streamId.stopStream({ data });
     })
     .then(() => {
+      console.log('stop stream');
       res.json({});
-      const listenersCount = emitter.listeners(`cluster-${id}`).length;
-      if (listenersCount) {
-        streamId.emitCluster();
-        return;
-      }
-
-      delete streams[`${id}`];
     })
     .catch((e) => {
+      streamId.destroy();
       next(e);
     });
 };

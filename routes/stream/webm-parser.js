@@ -59,5 +59,9 @@ module.exports = ({ stream, start }) => {
     });
   }
 
-  return {headerStart, clusterStart};
+  if (headerStart.length === 0 && clusterStart.length === 0) {
+    return null;
+  }
+
+  return { headerStart, clusterStart };
 };

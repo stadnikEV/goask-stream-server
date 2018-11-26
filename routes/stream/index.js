@@ -1,4 +1,5 @@
 const getRequestData = require('./get-request-data');
+const StreamId = require('./stream-id');
 
 module.exports = (emitter, streams, req, res, next) => {
   const id = req.params.id;
@@ -6,7 +7,7 @@ module.exports = (emitter, streams, req, res, next) => {
 
   // создать объект stream
   if (!streamId) {
-    const StreamId = require('./stream-id');
+    console.log('создан новый объект streamId');
     streamId = new StreamId({
       emitter,
       id,
@@ -19,12 +20,13 @@ module.exports = (emitter, streams, req, res, next) => {
   getRequestData({ req })
     .then((data) => {
       // Добавить данные в stream
-      return streamId.addToStream({ data, streams: streamId });
+      return streamId.addToStream({ data });
     })
     .then(() => {
       res.json({});
     })
     .catch((e) => {
+      streamId.destroy();
       next(e);
     });
 };

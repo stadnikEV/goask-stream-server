@@ -1,27 +1,36 @@
-const fs = require('fs');
-const StreamDB = require('../../models/stream');
-const getLastFileName = require('./get-last-file-name');
-const getNextFileName = require('./get-next-file-name');
+const getFileName = require('./get-file-name');
+const finishFileStream = require('./finish-file-stream');
+const createFileStream = require('./create-file-stream');
+const addFileNameToDB = require('./add-file-name-to-db');
 
 module.exports = class SaveToFile {
   constructor({ id }) {
     this.id = id;
-    this.lastFileName = null;
   }
 
   save({ head, cluster, endFile }) {
     const promise = new Promise((resolve, reject) => {
-      this.getLastFileName()
-        .then(() => {
+      this.getFileName()
+        .then((fileName) => {
+
+          this.fileName = fileName;
+
           if (head) {
             const data = (cluster)
               ? Buffer.concat([head, cluster])
               : head;
 
             if (this.wstream) {
-              this.endFileStream({ data: endFile })
+              finishFileStream({ wstream: this.wstream, data: endFile })
                 .then(() => {
-                  this.createFileStream(data);
+                  return createFileStream({ path: `video/${this.id}/`, fileName: `${this.fileName}.webm` });
+                })
+                .then((wstream) => {
+                  this.wstream = wstream;
+                  this.wstream.write(data);
+                  return addFileNameToDB({ streamId: this.id, fileName: this.fileName });
+                })
+                .then(() => {
                   resolve();
                 })
                 .catch((e) => {
@@ -29,7 +38,13 @@ module.exports = class SaveToFile {
                 });
               return;
             }
-            this.createFileStream(data)
+
+            createFileStream({ path: `video/${this.id}/`, fileName: `${this.fileName}.webm` })
+              .then((wstream) => {
+                this.wstream = wstream;
+                this.wstream.write(data);
+                return addFileNameToDB({ streamId: this.id, fileName: this.fileName });
+              })
               .then(() => {
                 resolve();
               })
@@ -38,9 +53,9 @@ module.exports = class SaveToFile {
               });
             return;
           }
-          if (this.wstream) {
-            this.wstream.write(cluster);
-          }
+
+
+          this.wstream.write(cluster);
           resolve();
         })
         .catch((e) => {
@@ -51,91 +66,42 @@ module.exports = class SaveToFile {
     return promise;
   }
 
-
-
-  createFileStream(data) {
-    const promise = new Promise((resolve, reject) => {
-      this.nextFileName = getNextFileName({ lastFileName: this.lastFileName, id: this.id });
-      this.lastFileName = this.nextFileName;
-      this.addFileNameToDB({ fileName: this.lastFileName })
-        .then(() => {
-          this.wstream = fs.createWriteStream(`${this.nextFileName}.webm`);
-          this.wstream.on('open', () => {
-            this.wstream.write(data);
-            resolve();
-          });
-          this.wstream.on('error', (e) => {
-            reject(e);
-          })
-        });
-    });
-
-    return promise;
-  }
 
   endFileStream({ data }) {
     const promise = new Promise((resolve, reject) => {
       if (!this.wstream) {
         resolve();
+
         return;
       }
-      this.wstream.on('finish', () => {
-        resolve();
-      });
-      this.wstream.on('error', (e) => {
-        reject(e);
-      });
-
-      if (data) {
-        this.wstream.end(data);
-        return;
-      }
-      this.wstream.end();
-    });
-    return promise;
-  }
-
-  addFileNameToDB({ fileName }) {
-    const promise = new Promise((resolve) => {
-      StreamDB.findOne({ streamId: this.id })
-        .then((streamDB) => {
-          streamDB.files.push(fileName);
-          return streamDB.save();
-        })
+      finishFileStream({ wstream: this.wstream, data })
         .then(() => {
           resolve();
-        });
+        })
+        .catch((e) => {
+          reject(e);
+        })
     });
+
     return promise;
   }
 
-  getLastFileName() {
+
+  getFileName() {
     const promise = new Promise((resolve, reject) => {
-      if (this.lastFileName) {
-        resolve(this.lastFileName);
+      if (this.fileName) {
+        resolve(this.fileName);
         return;
       }
-
-      StreamDB.findOne({ streamId: this.id })
-        .then((streamDB) => {
-          // создать данные о новом стриме в базе данных
-          if (!streamDB) {
-            const streamDB = new StreamDB({
-              streamId: this.id,
-              files: [],
-            });
-            return streamDB.save();
-          }
-          return streamDB;
-        })
-        .then((streamDB) => {
-          this.lastFileName = getLastFileName({ files: streamDB.files });
-          resolve(this.lastFileName);
+      getFileName({ streamId: this.id })
+        .then((fileName) => {
+          resolve(fileName);
         })
         .catch((e) => {
           reject(e);
         });
     });
-    return promise;
+
+    return promise
   }
 }
