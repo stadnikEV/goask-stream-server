@@ -2,5 +2,6 @@
   "port": "5000",
   "mongoose": {
     "uri": "mongodb://localhost/stream"
-  }
+  },
+  "videoPath": "video"
 }

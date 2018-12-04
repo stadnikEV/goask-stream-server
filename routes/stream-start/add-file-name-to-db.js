@@ -9,11 +9,11 @@ module.exports = ({ streamId, fileName }) => {
         if (!streamDB) {
           streamDB = new StreamDB({
             streamId,
-            files: [],
+            webm: [],
           });
         }
 
-        streamDB.files.push(fileName);
+        streamDB.webm.push(fileName);
         return streamDB.save();
       })
       .then(() => {

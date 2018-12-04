@@ -2,8 +2,6 @@ const webmParser = require('./webm-parser');
 const SaveToFile = require('./save-to-file');
 const ChunkingBuffer = require('./chunking-buffer');
 const getStartByteForParser = require('./get-start-byte-for-parser');
-
-
 const HttpError = require('../../error');
 
 module.exports = class StreamId {
@@ -89,7 +87,7 @@ module.exports = class StreamId {
       })
         .then(() => {
           this.isBusy = false;
-          this.emitStreamReady()
+          this.emitStreamReady();
           resolve();
         })
         .catch((e) => {
@@ -114,7 +112,7 @@ module.exports = class StreamId {
         .catch(() => {
           this.destroy();
         });
-    }, 7000);
+    }, 6000);
   }
 
   emitStreamReady() {
@@ -145,9 +143,11 @@ module.exports = class StreamId {
       }
 
       const endStream = () => {
+        this.isBusy = true;
         this.emitter.removeListener(`stream-ready-${this.id}`, endStream);
         this.saveToFile.endFileStream({ data: this.buffer })
           .then(() => {
+            this.isBusy = true;
             resolve();
           })
           .catch((e) => {
