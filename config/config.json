@@ -3,5 +3,6 @@
   "mongoose": {
     "uri": "mongodb://localhost/stream"
   },
-  "videoPath": "video"
+  "videoPath": "video",
+  "videoRequestInterval": "10000"
 }

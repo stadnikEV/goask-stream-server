@@ -38,7 +38,6 @@ module.exports = class StreamId {
     if (!this.stack[0]) {
       return;
     }
-
     const streamId = this.stack[0].streamId;
     const originaFile = this.stack[0].originaFile;
     const targetFile = this.stack[0].targetFile;

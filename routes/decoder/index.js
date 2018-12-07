@@ -31,7 +31,6 @@ module.exports = (decoder, req, res, next) => {
 
     res.json({});
   } catch (e) {
-
     next(e);
   }
 };

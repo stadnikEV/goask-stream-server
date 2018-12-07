@@ -1,5 +1,5 @@
 module.exports = ({ app, decoder, emitter, streams }) => {
-  // app.get('/status/:id', require('./get-status').bind(null, streams));
+  app.post('/status-video', require('./get-status-video').bind(null, decoder));
 
   app.post('/stream/:id/start',
     require('../middleware/stream-is-not-exists').bind(null, streams),

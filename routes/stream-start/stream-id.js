@@ -1,3 +1,4 @@
+const config = require('../../config');
 const webmParser = require('./webm-parser');
 const SaveToFile = require('./save-to-file');
 const ChunkingBuffer = require('./chunking-buffer');
@@ -112,7 +113,7 @@ module.exports = class StreamId {
         .catch(() => {
           this.destroy();
         });
-    }, 6000);
+    }, config.get('videoRequestInterval'));
   }
 
   emitStreamReady() {
