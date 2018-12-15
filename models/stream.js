@@ -7,8 +7,8 @@ var schema = new Schema({
     unique: true,
     required: true,
   },
-  mp4: String,
-  webm: {
+  decodedVideo: String,
+  originVideo: {
     type: Array,
   }
 });

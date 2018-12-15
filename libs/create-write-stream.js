@@ -1,6 +1,6 @@
 const fs = require('fs');
-const isDirectoryExist = require('../../libs/is-directory-exist');
-const creatreDirectory = require('../../libs/create-directory');
+const isDirectoryExist = require('./is-directory-exist');
+const creatreDirectory = require('./create-directory');
 
 module.exports = ({ path, fileName }) => {
   const promise = new Promise((resolve, reject) => {

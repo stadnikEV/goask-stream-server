@@ -1,8 +1,8 @@
 const config = require('../../config');
 const getFileName = require('./get-file-name');
 const finishFileStream = require('./finish-file-stream');
-const createFileStream = require('./create-file-stream');
-const addFileNameToDB = require('./add-file-name-to-db');
+const createWriteStream = require('../../libs/create-write-stream');
+const addFileNameToDB = require('../../libs/add-file-name-to-db');
 
 module.exports = class SaveToFile {
   constructor({ id }) {
@@ -20,12 +20,12 @@ module.exports = class SaveToFile {
           finishFileStream({ wstream: this.wstream, data: endFile })
             .then(() => {
               this.fileName += 1;
-              return createFileStream({ path: `${config.get('videoPath')}/${this.id}/`, fileName: `${this.fileName}.webm` });
+              return createWriteStream({ path: `${config.get('videoPath')}/${this.id}/`, fileName: `${this.fileName}.webm` });
             })
             .then((wstream) => {
               this.wstream = wstream;
               this.wstream.write(data);
-              return addFileNameToDB({ streamId: this.id, fileName: this.fileName });
+              return addFileNameToDB({ streamId: this.id, fileName: `${this.fileName}.webm` });
             })
             .then(() => {
               resolve();
@@ -40,12 +40,12 @@ module.exports = class SaveToFile {
         getFileName({ streamId: this.id })
           .then((fileName) => {
             this.fileName = fileName;
-            return createFileStream({ path: `${config.get('videoPath')}/${this.id}/`, fileName: `${this.fileName}.webm` })
+            return createWriteStream({ path: `${config.get('videoPath')}/${this.id}/`, fileName: `${this.fileName}.webm` })
           })
           .then((wstream) => {
             this.wstream = wstream;
             this.wstream.write(data);
-            return addFileNameToDB({ streamId: this.id, fileName: this.fileName });
+            return addFileNameToDB({ streamId: this.id, fileName: `${this.fileName}.webm` });
           })
           .then(() => {
             resolve();

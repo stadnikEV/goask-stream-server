@@ -12,7 +12,7 @@ module.exports = (streams, req, res, next) => {
           message: 'No files to encode',
         }));
       }
-      if (!stream.webm[0]) {
+      if (!stream.originVideo[0]) {
         return Promise.reject(new HttpError({
           status: 403,
           message: 'No files to encode',

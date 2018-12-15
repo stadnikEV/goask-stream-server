@@ -4,23 +4,22 @@ const removeDirectory = require('../../libs/remove-directiory');
 
 module.exports = (decoder, req, res, next) => {
   const id = req.params.id;
-  const originaFile = `${res.locals.streamDB.webm[0]}.webm`;
-
-  const fileName = req.body.fileName;
+  const originalFile = res.locals.streamDB.originVideo[0];
+  const fileName = `${req.body.fileName}.mp4`;
   const streamDB = res.locals.streamDB;
 
   try {
     decoder.add({
       streamId: id,
-      originaFile,
-      targetFile: `${fileName}.mp4`,
+      originalFile,
+      targetFile: fileName,
     })
       .then(() => {
-        removeDirectory({ path: `${config.get('videoPath')}/${id}/${originaFile}`});
+        removeDirectory({ path: `${config.get('videoPath')}/${id}/${originalFile}`});
       })
       .then(() => {
-        streamDB.webm = [];
-        streamDB.mp4 = fileName;
+        streamDB.originVideo = [];
+        streamDB.decodedVideo = fileName;
         return streamDB.save();
       })
       .catch((e) => {

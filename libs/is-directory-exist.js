@@ -3,10 +3,10 @@ const fs = require('fs');
 module.exports = ({ path }) => {
   const promise = new Promise((resolve, reject) => {
 
-    fs.stat(path, (err) => {
+    fs.stat(path, (err, stats) => {
 
       if (err === null) {
-        resolve(true);
+        resolve(stats);
         return;
       }
 

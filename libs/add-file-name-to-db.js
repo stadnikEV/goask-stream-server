@@ -1,4 +1,4 @@
-const StreamDB = require('../../models/stream');
+const StreamDB = require('../models/stream');
 
 module.exports = ({ streamId, fileName }) => {
   const promise = new Promise((resolve, reject) => {
@@ -9,11 +9,11 @@ module.exports = ({ streamId, fileName }) => {
         if (!streamDB) {
           streamDB = new StreamDB({
             streamId,
-            webm: [],
+            originVideo: [],
           });
         }
 
-        streamDB.webm.push(fileName);
+        streamDB.originVideo.push(fileName);
         return streamDB.save();
       })
       .then(() => {

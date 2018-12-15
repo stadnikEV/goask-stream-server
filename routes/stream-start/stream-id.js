@@ -5,6 +5,7 @@ const ChunkingBuffer = require('./chunking-buffer');
 const getStartByteForParser = require('./get-start-byte-for-parser');
 const HttpError = require('../../error');
 
+
 module.exports = class StreamId {
   constructor({ emitter, id, streams }) {
 
